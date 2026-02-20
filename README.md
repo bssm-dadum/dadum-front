@@ -1,47 +1,99 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
 # dadum-front
+
+React 프론트엔드 프로젝트
+
+## 기술 스택
+
+| 항목 | 내용 |
+|---|---|
+| 프레임워크 | React 19 + TypeScript 5 |
+| 번들러 | Vite 6 |
+| 스타일 | TailwindCSS v4 |
+| 서버 상태 | TanStack Query v5 |
+| 패키지 매니저 | pnpm (Node >= 22) |
+| 컨테이너 | Docker (dev/prod) |
+
+## 프로덕션 서버: nginx 선택 이유
+
+`vite preview`는 프로덕션 용도가 아닌 빌드 결과 확인용.
+nginx는 정적 파일 캐시 헤더, gzip 압축, SPA fallback(`try_files`)을 기본 지원하며 프로덕션 검증된 안정성을 제공.
+
+## 포트
+
+| 환경 | 포트 |
+|---|---|
+| 개발 (Vite dev server) | 5173 |
+| 프로덕션 (nginx in Docker) | 4173 (host) → 80 (container) |
+
+## 사전 요구사항
+
+- Node.js >= 22 LTS
+- pnpm >= 9
+- Docker + Docker Compose
+
+## 로컬 개발 (Docker 없이)
+
+```bash
+pnpm install
+pnpm dev        # http://localhost:5173
+```
+
+## Make 명령어
+
+```bash
+make install    # 의존성 설치 (pnpm)
+make dev        # 개발 서버 실행 (Docker, port 5173)
+make build      # 프로덕션 Docker 이미지 빌드
+make prod       # 프로덕션 서버 실행 (Docker, port 4173)
+make stop       # 모든 컨테이너 중지
+make logs       # 컨테이너 로그 확인
+make clean      # 사용하지 않는 도커 자원 정리
+```
+
+## 최초 실행 순서
+
+```bash
+# 1. 의존성 설치 (pnpm-lock.yaml 생성)
+pnpm install
+
+# 2-a. 로컬 개발
+pnpm dev
+
+# 2-b. Docker 개발
+make dev
+
+# 3. 프로덕션 빌드 + 실행
+make build
+make prod
+```
+
+## Tailwind v4 커스터마이징
+
+v4는 CSS-first 설정 방식. `tailwind.config.ts` 대신 `src/index.css`에서:
+
+```css
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #3b82f6;
+  --font-sans: 'Pretendard', sans-serif;
+}
+```
+
+## 폴더 구조
+
+```
+dadum-front/
+├── docker/             # docker-compose 파일
+├── scripts/            # run_dev.sh, run_prod.sh
+├── src/
+│   ├── hooks/          # useHealth.ts (TanStack Query 예시)
+│   ├── App.tsx
+│   ├── main.tsx        # QueryClientProvider 진입점
+│   └── index.css       # Tailwind import
+├── Dockerfile.dev
+├── Dockerfile.prod     # 멀티스테이지 (builder + nginx)
+├── nginx.conf
+├── Makefile
+└── vite.config.ts
+```
