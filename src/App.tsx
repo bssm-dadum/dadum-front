@@ -1,11 +1,14 @@
 import { Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { Landing } from './pages/Landing';
 
 const App = () => {
   return (
     <Routes>
-      {/* TODO: 라우트를 여기에 추가하세요 */}
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
     </Routes>
   );
 };
